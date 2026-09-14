@@ -1,15 +1,8 @@
 <?php
 require 'koneksi.php';
-
-// Proteksi halaman
-if (!isset($_SESSION['role'])) {
-    header("Location: login.php");
-    exit;
-}
-
+if (!isset($_SESSION['role'])) { header("Location: login.php"); exit; }
 $alert = '';
 
-// Proses Tambah Data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_data'])) {
     $id_user = $_SESSION['id_user'];
     $tanggal = $_POST['tanggal'];
@@ -24,25 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_data'])) {
 
     if ($stmt->execute()) {
         $alert = "<script>
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: 'Data pendataan berhasil ditambahkan.',
-                        icon: 'success',
-                        confirmButtonColor: '#fd7e14'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = 'index.php';
-                        }
-                    });
-                  </script>";
+            Swal.fire({ title: 'Tersimpan!', text: 'Data berhasil ditambahkan.', icon: 'success', confirmButtonColor: '#fd7e14' })
+            .then((result) => { if (result.isConfirmed) { window.location.href = 'index.php'; } });
+        </script>";
     } else {
-        $alert = "<script>
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Terjadi kesalahan sistem saat menyimpan data.',
-                        icon: 'error'
-                    });
-                  </script>";
+        $alert = "<script>Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');</script>";
     }
     $stmt->close();
 }
@@ -52,69 +31,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_data'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Data - Aplikasi Pendataan</title>
+    <title>Tambah Data - Pendataan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .bg-orange { background-color: #fd7e14 !important; color: white; }
-        .btn-orange { background-color: #fd7e14; color: white; border: none; }
-        .btn-orange:hover { background-color: #e86c0c; color: white; }
+        body { background-color: #f8f9fc; }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fd7e14 0%, #d96408 100%); color: white; }
+        .btn-orange { background-color: #fd7e14; color: white; border-radius: 8px; font-weight: bold; }
+        .btn-orange:hover { background-color: #d96408; color: white; }
+        .card-custom { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: none; }
     </style>
 </head>
-<body class="bg-light">
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg bg-orange shadow-sm">
-    <div class="container">
-        <a class="navbar-brand text-white fw-bold" href="index.php"><i class="fa fa-database"></i> App Pendataan</a>
-        <div class="d-flex align-items-center">
-            <a href="index.php" class="btn btn-light btn-sm">
-                <i class="fa fa-arrow-left"></i> Kembali
-            </a>
-        </div>
-    </div>
-</nav>
+<body>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-orange text-white text-center py-3">
-                    <h5 class="mb-0"><i class="fa fa-plus-circle"></i> Form Tambah Pendataan</h5>
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-custom overflow-hidden">
+                <div class="card-header bg-gradient-orange text-center py-4 border-0">
+                    <h4 class="mb-0 fw-bold"><i class="fa fa-pencil-square-o"></i> Form Tambah Data</h4>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-md-5">
                     <form method="POST" action="">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tanggal</label>
-                            <input type="date" name="tanggal" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-control" placeholder="Masukkan nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Kelas</label>
-                            <input type="text" name="kelas" class="form-control" placeholder="Contoh: XII IPA 1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Sekolah</label>
-                            <input type="text" name="sekolah" class="form-control" placeholder="Nama Sekolah" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nomor WhatsApp</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa fa-whatsapp"></i></span>
-                                <input type="number" name="nomor_whatsapp" class="form-control" placeholder="08..." required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted fw-bold small">Tanggal</label>
+                                <input type="date" name="tanggal" class="form-control rounded-3" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted fw-bold small">Nomor WhatsApp</label>
+                                <input type="number" name="nomor_whatsapp" class="form-control rounded-3" placeholder="Contoh: 0812..." required>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Kota</label>
-                            <input type="text" name="kota" class="form-control" placeholder="Asal kota" required>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="nama" class="form-control rounded-3" id="nama" placeholder="Nama" required>
+                            <label for="nama">Nama Lengkap</label>
                         </div>
-                        <button type="submit" name="tambah_data" class="btn btn-orange w-100 fw-bold py-2">
-                            <i class="fa fa-save"></i> Simpan Data
-                        </button>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="kelas" class="form-control rounded-3" id="kelas" placeholder="Kelas" required>
+                            <label for="kelas">Kelas (Contoh: XII IPA)</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="sekolah" class="form-control rounded-3" id="sekolah" placeholder="Instansi" required>
+                            <label for="sekolah">Nama Sekolah / Instansi</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" name="kota" class="form-control rounded-3" id="kota" placeholder="Kota" required>
+                            <label for="kota">Asal Kota</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a href="index.php" class="btn btn-light w-50 py-2 border rounded-3 text-secondary fw-bold">
+                                <i class="fa fa-arrow-left"></i> Batal
+                            </a>
+                            <button type="submit" name="tambah_data" class="btn btn-orange w-50 py-2 rounded-3">
+                                <i class="fa fa-save"></i> Simpan
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -123,6 +101,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_data'])) {
 </div>
 
 <?= $alert; ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -2,7 +2,6 @@
 session_start();
 require 'koneksi.php';
 
-// Jika user sudah login, langsung arahkan ke halaman utama
 if (isset($_SESSION['role'])) {
     header("Location: index.php");
     exit;
@@ -10,12 +9,16 @@ if (isset($_SESSION['role'])) {
 
 $alert = '';
 
+// Notifikasi jika redirect dari logout
+if (isset($_GET['pesan']) && $_GET['pesan'] == 'logout') {
+    $alert = "<script>Swal.fire({ title: 'Berhasil Logout!', text: 'Anda telah keluar dari sistem.', icon: 'success', timer: 2000, showConfirmButton: false });</script>";
+}
+
 // Proses Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Cek username di database menggunakan prepared statement
     $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -23,35 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-        
-        // Verifikasi password hash
         if (password_verify($password, $user['password'])) {
-            // Set session jika berhasil login
             $_SESSION['id_user'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
-            
             header("Location: index.php");
             exit;
         } else {
-            $alert = "<script>
-                        Swal.fire({
-                            title: 'Login Gagal!',
-                            text: 'Password yang Anda masukkan salah.',
-                            icon: 'error',
-                            confirmButtonColor: '#fd7e14'
-                        });
-                      </script>";
+            $alert = "<script>Swal.fire('Gagal!', 'Password yang Anda masukkan salah.', 'error');</script>";
         }
     } else {
-        $alert = "<script>
-                    Swal.fire({
-                        title: 'Login Gagal!',
-                        text: 'Username tidak ditemukan.',
-                        icon: 'error',
-                        confirmButtonColor: '#fd7e14'
-                    });
-                  </script>";
+        $alert = "<script>Swal.fire('Gagal!', 'Username tidak ditemukan.', 'error');</script>";
     }
     $stmt->close();
 }
@@ -66,61 +51,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body {
-            background-color: #f4f6f9;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .bg-orange { background-color: #fd7e14 !important; color: white; }
-        .btn-orange { background-color: #fd7e14; color: white; border: none; }
-        .btn-orange:hover { background-color: #e86c0c; color: white; }
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .input-group-text {
-            background-color: #fd7e14;
-            color: white;
-            border: none;
-        }
+        body { background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: none; overflow: hidden; max-width: 420px; width: 100%; }
+        .bg-gradient-orange { background: linear-gradient(135deg, #fd7e14 0%, #d96408 100%); color: white; }
+        .btn-orange { background-color: #fd7e14; color: white; border-radius: 10px; font-weight: bold; transition: all 0.3s; }
+        .btn-orange:hover { background-color: #d96408; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(253, 126, 20, 0.4); }
     </style>
 </head>
 <body>
 
-<div class="card login-card border-0">
-    <div class="card-header bg-orange text-center py-4" style="border-radius: 10px 10px 0 0;">
-        <h4 class="mb-0"><i class="fa fa-database"></i> App Pendataan</h4>
-        <small>Silakan login untuk melanjutkan</small>
+<div class="card login-card">
+    <div class="card-header bg-gradient-orange text-center py-5 border-0">
+        <i class="fa fa-database fa-3x mb-3"></i>
+        <h3 class="mb-0 fw-bold">App Pendataan</h3>
+        <p class="text-white-50 mb-0">Silakan masuk ke akun Anda</p>
     </div>
-    <div class="card-body p-4">
+    <div class="card-body p-4 p-md-5 bg-white">
         <form method="POST" action="">
-            <div class="mb-3">
-                <label class="form-label fw-bold">Username</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-user"></i></span>
-                    <input type="text" name="username" class="form-control" placeholder="Masukkan username" required autofocus>
-                </div>
+            <div class="form-floating mb-3">
+                <input type="text" name="username" class="form-control rounded-3" id="floatingInput" placeholder="Username" required autofocus>
+                <label for="floatingInput"><i class="fa fa-user text-muted"></i> Username</label>
             </div>
-            <div class="mb-4">
-                <label class="form-label fw-bold">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-lock"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
-                </div>
+            <div class="form-floating mb-4">
+                <input type="password" name="password" class="form-control rounded-3" id="floatingPassword" placeholder="Password" required>
+                <label for="floatingPassword"><i class="fa fa-lock text-muted"></i> Password</label>
             </div>
-            <button type="submit" name="login" class="btn btn-orange w-100 py-2 fw-bold">
-                <i class="fa fa-sign-in"></i> Masuk
+            <button type="submit" name="login" class="btn btn-orange w-100 py-3">
+                <i class="fa fa-sign-in"></i> MASUK SEKARANG
             </button>
         </form>
     </div>
 </div>
 
 <?= $alert; ?>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
